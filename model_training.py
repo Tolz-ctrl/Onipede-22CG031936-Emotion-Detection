@@ -62,7 +62,7 @@ def load_data_from_csv(csv_path='data/data/emotions.csv'):
 
     return X_train, X_val, y_train, y_val
 
-def load_data_from_directory(train_dir='data/fer2013/train', val_dir='data/fer2013/test'):
+def load_data_from_directory(train_dir='data/data/archive/train', val_dir='data/data/archive/test'):
     """Load data from directory structure (alternative method)"""
     print(f"\n📂 Loading data from directories...")
 
