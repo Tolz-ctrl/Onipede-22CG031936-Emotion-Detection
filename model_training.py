@@ -4,19 +4,23 @@ Emotion Detection Model Training Script
 Trains a CNN model to classify facial expressions into 7 emotion categories
 """
 
+# Set Keras backend to JAX (compatible with Python 3.14)
 import os
+os.environ['KERAS_BACKEND'] = 'jax'
+
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.utils import to_categorical
+import keras
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.utils import to_categorical, image_dataset_from_directory
 from sklearn.model_selection import train_test_split
+from PIL import Image
 
 print("🚀 Starting Emotion Detection Model Training...")
-print(f"TensorFlow Version: {tf.__version__}")
+print(f"Keras Version: {keras.__version__}")
+print(f"Backend: {keras.backend.backend()}")
 
 # Emotion labels
 EMOTIONS = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
@@ -62,39 +66,44 @@ def load_data_from_csv(csv_path='data/data/emotions.csv'):
 
     return X_train, X_val, y_train, y_val
 
-def load_data_from_directory(train_dir='data/data/archive/train', val_dir='data/data/archive/test'):
-    """Load data from directory structure (alternative method)"""
+def load_data_from_directory(train_dir='data/data/subset/train', val_dir='data/data/subset/test'):
+    """Load data from directory structure using Keras 3 API"""
     print(f"\n📂 Loading data from directories...")
+    print(f"   Train: {train_dir}")
+    print(f"   Val: {val_dir}")
 
-    # Data augmentation for training
-    train_datagen = ImageDataGenerator(
-        rescale=1./255,
-        rotation_range=20,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        horizontal_flip=True,
-        zoom_range=0.2,
-        shear_range=0.2,
-        fill_mode='nearest'
-    )
-
-    val_datagen = ImageDataGenerator(rescale=1./255)
-
-    train_data = train_datagen.flow_from_directory(
+    # Load training data
+    train_data = image_dataset_from_directory(
         train_dir,
-        target_size=(IMG_SIZE, IMG_SIZE),
-        batch_size=64,
+        labels='inferred',
+        label_mode='categorical',
         color_mode='grayscale',
-        class_mode='categorical'
+        batch_size=64,
+        image_size=(IMG_SIZE, IMG_SIZE),
+        shuffle=True,
+        seed=42
     )
 
-    val_data = val_datagen.flow_from_directory(
+    # Load validation data
+    val_data = image_dataset_from_directory(
         val_dir,
-        target_size=(IMG_SIZE, IMG_SIZE),
-        batch_size=64,
+        labels='inferred',
+        label_mode='categorical',
         color_mode='grayscale',
-        class_mode='categorical'
+        batch_size=64,
+        image_size=(IMG_SIZE, IMG_SIZE),
+        shuffle=False,
+        seed=42
     )
+
+    # Normalize pixel values to [0, 1]
+    normalization_layer = keras.layers.Rescaling(1./255)
+    train_data = train_data.map(lambda x, y: (normalization_layer(x), y))
+    val_data = val_data.map(lambda x, y: (normalization_layer(x), y))
+
+    print(f"✅ Training data loaded successfully")
+    print(f"✅ Validation data loaded successfully")
+    print(f"📊 Classes: {train_data.class_names}")
 
     return train_data, val_data
 
@@ -199,7 +208,7 @@ def train_model():
         history = model.fit(
             datagen.flow(X_train, y_train, batch_size=64),
             validation_data=(X_val, y_val),
-            epochs=50,
+            epochs=20,
             callbacks=[early_stopping, reduce_lr],
             verbose=1
         )
@@ -207,7 +216,7 @@ def train_model():
         history = model.fit(
             train_data,
             validation_data=val_data,
-            epochs=50,
+            epochs=20,
             callbacks=[early_stopping, reduce_lr],
             verbose=1
         )

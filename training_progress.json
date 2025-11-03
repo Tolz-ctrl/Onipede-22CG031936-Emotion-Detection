@@ -1,0 +1,67 @@
+{
+  "status": "training",
+  "start_time": "2025-11-03T10:44:12.517303",
+  "total_epochs": 20,
+  "current_epoch": 4,
+  "epochs_completed": 3,
+  "history": {
+    "epoch": [
+      1,
+      2,
+      3
+    ],
+    "accuracy": [
+      0.1789533942937851,
+      0.21161191165447235,
+      0.2582123875617981
+    ],
+    "loss": [
+      2.7184553146362305,
+      2.3497211933135986,
+      2.0764858722686768
+    ],
+    "val_accuracy": [
+      0.1632341742515564,
+      0.15255530178546906,
+      0.15255530178546906
+    ],
+    "val_loss": [
+      2.571561574935913,
+      2.8306307792663574,
+      2.1125597953796387
+    ],
+    "learning_rate": [
+      0.001,
+      0.001,
+      0.001
+    ]
+  },
+  "model_info": {
+    "total_params": 6003143,
+    "trainable_params": 5999815,
+    "model_size_mb": 22.9,
+    "train_samples": 5236,
+    "val_samples": 1311,
+    "batch_size": 64,
+    "img_size": 48,
+    "num_classes": 7,
+    "emotions": [
+      "Angry",
+      "Disgust",
+      "Fear",
+      "Happy",
+      "Sad",
+      "Surprise",
+      "Neutral"
+    ]
+  },
+  "estimated_time_remaining": 9681,
+  "elapsed_time": 1708,
+  "latest_metrics": {
+    "epoch": 3,
+    "accuracy": 0.2582123875617981,
+    "loss": 2.0764858722686768,
+    "val_accuracy": 0.15255530178546906,
+    "val_loss": 2.1125597953796387
+  }
+}
